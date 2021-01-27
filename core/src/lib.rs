@@ -3,11 +3,11 @@
 
 //! This crate contains the core components and resources to use Heron.
 
-use bevy_ecs::Entity;
-
+pub use event::CollisionEvent;
 pub use gravity::Gravity;
 pub use velocity::{AxisAngle, Velocity};
 
+mod event;
 mod gravity;
 pub mod utils;
 mod velocity;
@@ -32,14 +32,4 @@ pub enum Body {
         /// Radius of the sphere
         radius: f32,
     },
-}
-
-/// An event fired when the collision state between two entities changed
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum CollisionEvent {
-    /// The two entity started to collide
-    Started(Entity, Entity),
-
-    /// The two entity no longer collide
-    Stopped(Entity, Entity),
 }
