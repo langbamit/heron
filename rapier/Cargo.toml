@@ -14,16 +14,16 @@ default = []
 
 [dependencies]
 heron_core = { path = "../core", version = "^0.1.1" }
-bevy_math = { git = "https://github.com/bevyengine/bevy.git" }
-bevy_core = { git = "https://github.com/bevyengine/bevy.git" }
-bevy_ecs = { git = "https://github.com/bevyengine/bevy.git" }
-bevy_app = { git = "https://github.com/bevyengine/bevy.git" }
-bevy_transform = { git = "https://github.com/bevyengine/bevy.git" }
+bevy_math = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+bevy_core = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+bevy_ecs = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+bevy_app = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+bevy_transform = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 rapier2d = { version = "^0.5.0", optional = true, features = ["simd-stable", "parallel"] }
 rapier3d = { version = "^0.5.0", optional = true, features = ["simd-stable", "parallel"] }
 fnv = "^1.0"
 crossbeam = "^0.8.0"
 
 [dev-dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy.git", default-features = false }
+bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main", default-features = false }
 rstest = "0.6"

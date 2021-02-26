@@ -8,8 +8,8 @@ description = "Core components and resources to use Heron"
 repository = "https://github.com/jcornaz/heron/"
 
 [dependencies]
-bevy_math = { git = "https://github.com/bevyengine/bevy.git" }
-bevy_ecs = { git = "https://github.com/bevyengine/bevy.git" }
+bevy_math = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+bevy_ecs = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 
 [dev-dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy.git", default-features = false }
+bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main", default-features = false }

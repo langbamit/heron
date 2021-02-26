@@ -22,11 +22,11 @@ debug = ["heron_debug", "bevy_render"]
 heron_core = { path = "core", version = "^0.1.1" }
 heron_rapier = { path = "rapier", version = "^0.1.1" }
 heron_debug = { path = "debug", version = "^0.1.1", optional = true }
-bevy_app = { git = "https://github.com/bevyengine/bevy.git" }
-bevy_render = { git = "https://github.com/bevyengine/bevy.git", optional = true }
+bevy_app = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+bevy_render = { git = "https://github.com/bevyengine/bevy.git", branch = "main", optional = true }
 
 [dev-dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy.git" }
+bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 
 [[example]]
 name = "demo"
