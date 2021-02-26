@@ -84,8 +84,8 @@ impl IntoRapier<Translation<f32>> for Vec3 {
 
 impl IntoRapier<UnitComplex<f32>> for Quat {
     fn into_rapier(self) -> UnitComplex<f32> {
-        let (Vec3 { z, .. }, angle) = self.to_axis_angle();
-        nalgebra::UnitComplex::new(if z > 0.0 { angle } else { -angle })
+        let (axis, angle) = self.to_axis_angle();
+        nalgebra::UnitComplex::new(if axis.z > 0.0 { angle } else { -angle })
     }
 }
 
