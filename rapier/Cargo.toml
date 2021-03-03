@@ -19,8 +19,8 @@ bevy_core = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 bevy_ecs = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 bevy_app = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 bevy_transform = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
-rapier2d = { version = "^0.5.0", optional = true, features = ["simd-stable", "parallel"] }
-rapier3d = { version = "^0.5.0", optional = true, features = ["simd-stable", "parallel"] }
+rapier2d = { version = "^0.6.1", optional = true, features = ["simd-stable"] }
+rapier3d = { version = "^0.6.1", optional = true, features = ["simd-stable"] }
 fnv = "^1.0"
 crossbeam = "^0.8.0"
 

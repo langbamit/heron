@@ -28,7 +28,6 @@ use crate::rapier::pipeline::PhysicsPipeline;
 mod body;
 pub mod convert;
 mod pipeline;
-mod restitution;
 mod velocity;
 
 #[allow(unused)]
@@ -110,7 +109,7 @@ impl Plugin for RapierPlugin {
         app.init_resource::<PhysicsPipeline>()
             .init_resource::<HandleMap>()
             .add_event::<CollisionEvent>()
-            .insert_resource(self.parameters.clone())
+            .insert_resource(self.parameters)
             .insert_resource(BroadPhase::new())
             .insert_resource(NarrowPhase::new())
             .insert_resource(RigidBodySet::new())
@@ -121,11 +120,10 @@ impl Plugin for RapierPlugin {
                 stage::PRE_STEP,
                 SystemStage::single_threaded()
                     .with_system(body::remove.system())
-                    .with_system(body::update_shape.system())
+                    .with_system(body::recreate_collider.system())
                     .with_system(body::update_rapier_position.system())
                     .with_system(body::update_rapier_status.system())
                     .with_system(velocity::update_rapier_velocity.system())
-                    .with_system(restitution::update_rapier_restitution.system())
                     .with_system(body::create.system()),
             )
             .add_stage_after(stage::PRE_STEP, "heron-step-and-post-step", {
