@@ -11,7 +11,7 @@ fn main() {
 }
 
 fn spawn(commands: &mut Commands) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(OrthographicCameraBundle::new_2d());
 
     // Sphere
     commands
