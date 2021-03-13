@@ -11,7 +11,7 @@ use bevy::reflect::TypeRegistryArc;
 use heron_core::Gravity;
 use heron_rapier::rapier::dynamics::{IntegrationParameters, JointSet, RigidBodySet};
 use heron_rapier::rapier::geometry::ColliderSet;
-use heron_rapier::RapierPlugin;
+use heron_rapier::{PhysicsWorld, RapierPlugin};
 
 #[test]
 fn can_define_gravity_before_plugin() {
@@ -34,8 +34,6 @@ fn rapier_world_is_registered() {
         .add_plugin(CorePlugin)
         .add_plugin(RapierPlugin::default());
 
-    assert!(app.resources().contains::<RigidBodySet>());
-    assert!(app.resources().contains::<ColliderSet>());
-    assert!(app.resources().contains::<JointSet>());
+    assert!(app.resources().contains::<PhysicsWorld>());
     assert!(app.resources().contains::<IntegrationParameters>());
 }

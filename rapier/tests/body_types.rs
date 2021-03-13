@@ -10,7 +10,7 @@ use bevy::reflect::TypeRegistryArc;
 use heron_core::{Body, BodyType};
 use heron_rapier::rapier::dynamics::{IntegrationParameters, RigidBodySet};
 use heron_rapier::rapier::geometry::ColliderSet;
-use heron_rapier::{BodyHandle, RapierPlugin};
+use heron_rapier::{BodyHandle, PhysicsWorld, RapierPlugin};
 
 fn test_app() -> App {
     let mut builder = App::build();
@@ -36,8 +36,9 @@ fn create_dynamic_body() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
-    let body = bodies
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    let body = world
+        .bodies
         .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
         .unwrap();
 
@@ -56,8 +57,9 @@ fn create_static_body() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
-    let body = bodies
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    let body = world
+        .bodies
         .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
         .unwrap();
 
@@ -76,8 +78,9 @@ fn create_kinematic_body() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
-    let body = bodies
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    let body = world
+        .bodies
         .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
         .unwrap();
 
@@ -96,8 +99,9 @@ fn create_sensor_body() {
 
     app.update();
 
-    let colliders = app.resources.get::<ColliderSet>().unwrap();
-    let body = colliders
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    let body = world
+        .colliders
         .get(app.world.get::<BodyHandle>(entity).unwrap().collider())
         .unwrap();
 
@@ -119,8 +123,9 @@ fn can_change_to_static_after_creation() {
     app.update();
 
     {
-        let bodies = app.resources.get::<RigidBodySet>().unwrap();
-        let body = bodies
+        let world = app.resources.get::<PhysicsWorld>().unwrap();
+        let body = world
+            .bodies
             .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
             .unwrap();
 
@@ -143,8 +148,9 @@ fn can_change_to_sensor_after_creation() {
     app.update();
 
     {
-        let colliders = app.resources.get::<ColliderSet>().unwrap();
-        let collider = colliders
+        let world = app.resources.get::<PhysicsWorld>().unwrap();
+        let collider = world
+            .colliders
             .get(app.world.get::<BodyHandle>(entity).unwrap().collider())
             .unwrap();
 
@@ -169,8 +175,9 @@ fn can_change_to_dynamic_after_creation() {
     app.update();
 
     {
-        let bodies = app.resources.get::<RigidBodySet>().unwrap();
-        let body = bodies
+        let world = app.resources.get::<PhysicsWorld>().unwrap();
+        let body = world
+            .bodies
             .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
             .unwrap();
 
@@ -195,8 +202,9 @@ fn can_change_to_dynamic_by_removing_type_after_creation() {
     app.update();
 
     {
-        let bodies = app.resources.get::<RigidBodySet>().unwrap();
-        let body = bodies
+        let world = app.resources.get::<PhysicsWorld>().unwrap();
+        let body = world
+            .bodies
             .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
             .unwrap();
 

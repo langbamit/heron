@@ -6,7 +6,7 @@ use bevy::reflect::TypeRegistryArc;
 
 use heron_core::{Body, RotationConstraints};
 use heron_rapier::rapier::dynamics::{IntegrationParameters, RigidBodySet};
-use heron_rapier::{BodyHandle, RapierPlugin};
+use heron_rapier::{BodyHandle, PhysicsWorld, RapierPlugin};
 
 fn test_app() -> App {
     let mut builder = App::build();
@@ -30,10 +30,11 @@ fn rotation_is_not_constrained_without_the_component() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
 
     assert!(
-        bodies
+        world
+            .bodies
             .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
             .unwrap()
             .effective_world_inv_inertia_sqrt
@@ -53,10 +54,11 @@ fn rotation_can_be_locked_at_creation() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
 
     assert_eq!(
-        bodies
+        world
+            .bodies
             .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
             .unwrap()
             .effective_world_inv_inertia_sqrt,
@@ -80,10 +82,11 @@ fn rotation_can_be_locked_after_creation() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
 
     assert_eq!(
-        bodies
+        world
+            .bodies
             .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
             .unwrap()
             .effective_world_inv_inertia_sqrt,
@@ -107,10 +110,11 @@ fn rotation_is_unlocked_if_component_is_removed() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
 
     assert!(
-        bodies
+        world
+            .bodies
             .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
             .unwrap()
             .effective_world_inv_inertia_sqrt

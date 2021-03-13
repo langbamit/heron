@@ -9,14 +9,13 @@ use std::ops::DerefMut;
 use bevy::core::CorePlugin;
 use bevy::prelude::*;
 use bevy::reflect::TypeRegistryArc;
+use rstest::rstest;
 
 use heron_core::{Body, BodyType};
 use heron_rapier::convert::{IntoBevy, IntoRapier};
 use heron_rapier::rapier::dynamics::{IntegrationParameters, RigidBodySet};
 use heron_rapier::rapier::geometry::ColliderSet;
-use heron_rapier::{BodyHandle, RapierPlugin};
-
-use rstest::rstest;
+use heron_rapier::{BodyHandle, PhysicsWorld, RapierPlugin};
 
 fn test_app() -> App {
     let mut builder = App::build();
@@ -53,8 +52,9 @@ fn creates_body_in_rapier_world() {
         .get::<BodyHandle>(entity)
         .expect("No body handle attached");
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
-    let colliders = app.resources.get::<ColliderSet>().unwrap();
+    let physics_world = app.resources.get::<PhysicsWorld>().unwrap();
+    let bodies = &physics_world.bodies;
+    let colliders = &physics_world.colliders;
 
     let body = bodies
         .get(handle.rigid_body())
@@ -113,9 +113,9 @@ fn update_shape() {
 
     app.update();
 
-    let colliders = app.resources.get::<ColliderSet>().unwrap();
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
     let handle = app.world.get::<BodyHandle>(entity).unwrap();
-    let collider = colliders.get(handle.collider()).unwrap();
+    let collider = world.colliders.get(handle.collider()).unwrap();
 
     assert_eq!(collider.shape().as_ball().unwrap().radius, 42.0)
 }
@@ -140,9 +140,9 @@ fn update_rapier_position() {
 
     app.update();
 
-    let colliders = app.resources.get::<RigidBodySet>().unwrap();
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
     let handle = app.world.get::<BodyHandle>(entity).unwrap();
-    let rigid_body = colliders.get(handle.rigid_body()).unwrap();
+    let rigid_body = world.bodies.get(handle.rigid_body()).unwrap();
     let (actual_translation, actual_rotation) = rigid_body.position().into_bevy();
 
     #[cfg(feature = "3d")]
@@ -173,11 +173,9 @@ fn remove_body_component() {
 
     assert!(app.world.get::<BodyHandle>(entity).is_err());
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
-    assert_eq!(bodies.len(), 0);
-
-    let colliders = app.resources.get::<ColliderSet>().unwrap();
-    assert_eq!(colliders.len(), 0);
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    assert_eq!(world.bodies.len(), 0);
+    assert_eq!(world.colliders.len(), 0);
 }
 
 #[test]
@@ -195,11 +193,9 @@ fn despawn_body_entity() {
 
     assert!(app.world.get::<BodyHandle>(entity).is_err());
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
-    assert_eq!(bodies.len(), 0);
-
-    let colliders = app.resources.get::<ColliderSet>().unwrap();
-    assert_eq!(colliders.len(), 0);
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    assert_eq!(world.bodies.len(), 0);
+    assert_eq!(world.colliders.len(), 0);
 }
 
 #[rstest(
@@ -227,8 +223,8 @@ fn update_bevy_transform(body_type: Option<BodyType>) {
     {
         app.update();
         let handle = *app.world.get::<BodyHandle>(entity).unwrap();
-        let mut bodies = app.resources.get_mut::<RigidBodySet>().unwrap();
-        let body = bodies.get_mut(handle.rigid_body()).unwrap();
+        let mut world = app.resources.get_mut::<PhysicsWorld>().unwrap();
+        let body = world.bodies.get_mut(handle.rigid_body()).unwrap();
 
         body.set_position((translation, rotation).into_rapier(), true);
     }

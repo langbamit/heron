@@ -12,20 +12,20 @@ use bevy_prototype_lyon::shapes::RectangleOrigin;
 use heron_core::Body;
 use heron_rapier::convert::IntoBevy;
 use heron_rapier::rapier::geometry::{ColliderSet, Shape};
-use heron_rapier::BodyHandle;
+use heron_rapier::{BodyHandle, PhysicsWorld};
 
 use super::*;
 
 pub(crate) fn create_debug_sprites(
     commands: &mut Commands,
-    colliders: Res<'_, ColliderSet>,
+    world: Res<'_, PhysicsWorld>,
     query: Query<'_, (Entity, &Body, &BodyHandle, &GlobalTransform), Without<HasDebug>>,
     debug_mat: Res<'_, DebugMaterial>,
 ) {
     let material = debug_mat.handle().expect("Debug material wasn't loaded");
 
     for (entity, body, handle, transform) in query.iter() {
-        if let Some(collider) = colliders.get(handle.collider()) {
+        if let Some(collider) = world.colliders.get(handle.collider()) {
             commands.set_current_entity(entity);
             commands
                 .with_children(|builder| {
@@ -46,7 +46,7 @@ pub(crate) fn create_debug_sprites(
 pub(crate) fn replace_debug_sprite(
     commands: &mut Commands,
     mut map: ResMut<'_, DebugEntityMap>,
-    colliders: Res<'_, ColliderSet>,
+    world: Res<'_, PhysicsWorld>,
     query: Query<
         '_,
         (Entity, &Body, &BodyHandle, &GlobalTransform),
@@ -57,9 +57,10 @@ pub(crate) fn replace_debug_sprite(
     let material = debug_mat.handle().expect("Debug material wasn't loaded");
 
     for (parent_entity, body, handle, transform) in query.iter() {
-        if let (Some(debug_entity), Some(collider)) =
-            (map.remove(&parent_entity), colliders.get(handle.collider()))
-        {
+        if let (Some(debug_entity), Some(collider)) = (
+            map.remove(&parent_entity),
+            world.colliders.get(handle.collider()),
+        ) {
             commands.despawn(debug_entity);
             commands.set_current_entity(parent_entity);
             commands.with_children(|builder| {

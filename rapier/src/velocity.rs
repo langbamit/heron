@@ -6,10 +6,10 @@ use heron_core::{BodyType, Velocity};
 
 use crate::convert::{IntoBevy, IntoRapier};
 use crate::rapier::dynamics::{IntegrationParameters, RigidBodySet};
-use crate::BodyHandle;
+use crate::{BodyHandle, PhysicsWorld};
 
 pub(crate) fn update_rapier_velocity(
-    mut bodies: ResMut<'_, RigidBodySet>,
+    mut world: ResMut<'_, PhysicsWorld>,
     query: Query<'_, (&BodyHandle, Option<&BodyType>, &Velocity), Changed<Velocity>>,
 ) {
     let dynamic_bodies = query.iter().filter(|(_, body_type, _)| {
@@ -17,7 +17,7 @@ pub(crate) fn update_rapier_velocity(
     });
 
     for (handle, _, velocity) in dynamic_bodies {
-        if let Some(body) = bodies.get_mut(handle.rigid_body) {
+        if let Some(body) = world.bodies.get_mut(handle.rigid_body) {
             let wake_up = !velocity.is_near_zero();
             body.set_linvel(velocity.linear.into_rapier(), wake_up);
             body.set_angvel(velocity.angular.into_rapier(), wake_up);
@@ -26,7 +26,7 @@ pub(crate) fn update_rapier_velocity(
 }
 
 pub(crate) fn apply_velocity_to_kinematic_bodies(
-    mut bodies: ResMut<'_, RigidBodySet>,
+    mut world: ResMut<'_, PhysicsWorld>,
     integration_parameters: Res<'_, IntegrationParameters>,
     query: Query<'_, (&BodyHandle, &BodyType, &Velocity)>,
 ) {
@@ -36,7 +36,7 @@ pub(crate) fn apply_velocity_to_kinematic_bodies(
         .filter(|(_, body_type, _)| matches!(body_type, BodyType::Kinematic));
 
     for (handle, _, velocity) in kinematic_bodies {
-        if let Some(body) = bodies.get_mut(handle.rigid_body) {
+        if let Some(body) = world.bodies.get_mut(handle.rigid_body) {
             let (mut translation, mut rotation) = body.position().into_bevy();
             translation += velocity.linear * delta_time;
             rotation *= Quat::from(velocity.angular * delta_time);
@@ -46,11 +46,15 @@ pub(crate) fn apply_velocity_to_kinematic_bodies(
 }
 
 pub(crate) fn update_velocity_component(
-    bodies: Res<'_, RigidBodySet>,
+    world: Res<'_, PhysicsWorld>,
     mut velocities: Query<'_, (&BodyHandle, &mut Velocity)>,
 ) {
     for (handle, mut velocity) in velocities.iter_mut() {
-        if let Some(body) = bodies.get(handle.rigid_body).filter(|it| it.is_dynamic()) {
+        if let Some(body) = world
+            .bodies
+            .get(handle.rigid_body)
+            .filter(|it| it.is_dynamic())
+        {
             velocity.linear = (*body.linvel()).into_bevy();
 
             #[cfg(feature = "2d")]

@@ -10,35 +10,51 @@ use crate::rapier::dynamics::{IntegrationParameters, JointSet, RigidBodySet};
 use crate::rapier::geometry::{
     BroadPhase, ColliderHandle, ColliderSet, ContactEvent, IntersectionEvent, NarrowPhase,
 };
-use crate::rapier::pipeline::{ChannelEventCollector, PhysicsPipeline};
+use crate::rapier::pipeline::{ChannelEventCollector, PhysicsPipeline, QueryPipeline};
 
-#[allow(clippy::too_many_arguments)]
+pub struct PhysicsWorld {
+    pub bodies: RigidBodySet,
+    pub colliders: ColliderSet,
+    pub joints: JointSet,
+    pub query: QueryPipeline,
+}
+
+impl Default for PhysicsWorld {
+    fn default() -> Self {
+        Self {
+            bodies: RigidBodySet::new(),
+            colliders: ColliderSet::new(),
+            joints: JointSet::new(),
+            query: QueryPipeline::default(),
+        }
+    }
+}
+
 pub(crate) fn step(
-    mut pipeline: ResMut<'_, PhysicsPipeline>,
     gravity: Res<'_, Gravity>,
     integration_parameters: Res<'_, IntegrationParameters>,
+    mut world: ResMut<'_, PhysicsWorld>,
+    mut pipeline: ResMut<'_, PhysicsPipeline>,
     mut broad_phase: ResMut<'_, BroadPhase>,
     mut narrow_phase: ResMut<'_, NarrowPhase>,
-    mut bodies: ResMut<'_, RigidBodySet>,
-    mut colliders: ResMut<'_, ColliderSet>,
-    mut joints: ResMut<'_, JointSet>,
     event_manager: Local<'_, EventManager>,
     mut events: ResMut<'_, Events<CollisionEvent>>,
 ) {
+    let world: &mut PhysicsWorld = &mut world;
     let gravity = Vec3::from(*gravity).into_rapier();
     pipeline.step(
         &gravity,
         &integration_parameters,
         &mut broad_phase,
         &mut narrow_phase,
-        &mut bodies,
-        &mut colliders,
-        &mut joints,
+        &mut world.bodies,
+        &mut world.colliders,
+        &mut world.joints,
         &(),
         &event_manager.handler,
     );
 
-    event_manager.fire_events(&colliders, &mut events);
+    event_manager.fire_events(&world.colliders, &mut events);
 }
 
 pub(crate) struct EventManager {

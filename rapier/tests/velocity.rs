@@ -3,6 +3,8 @@
     not(all(feature = "2d", feature = "3d")),
 ))]
 
+use std::f32::consts::PI;
+
 use bevy::core::CorePlugin;
 use bevy::prelude::*;
 use bevy::reflect::TypeRegistryArc;
@@ -10,8 +12,7 @@ use bevy::reflect::TypeRegistryArc;
 use heron_core::*;
 use heron_rapier::convert::{IntoBevy, IntoRapier};
 use heron_rapier::rapier::dynamics::{IntegrationParameters, RigidBodySet};
-use heron_rapier::{BodyHandle, RapierPlugin};
-use std::f32::consts::PI;
+use heron_rapier::{BodyHandle, PhysicsWorld, RapierPlugin};
 
 fn test_app() -> App {
     let mut builder = App::build();
@@ -45,9 +46,10 @@ fn body_is_created_with_velocity() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
 
-    let body = bodies
+    let body = world
+        .bodies
         .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
         .unwrap();
 
@@ -87,9 +89,10 @@ fn velocity_may_be_added_after_creating_the_body() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
 
-    let body = bodies
+    let body = world
+        .bodies
         .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
         .unwrap();
 
@@ -124,8 +127,9 @@ fn velocity_is_updated_to_reflect_rapier_world() {
     let angular: AxisAngle = AxisAngle::new(Vec3::unit_z(), PI * 0.5);
 
     {
-        let mut bodies = app.resources.get_mut::<RigidBodySet>().unwrap();
-        let body = bodies
+        let mut world = app.resources.get_mut::<PhysicsWorld>().unwrap();
+        let body = world
+            .bodies
             .get_mut(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
             .unwrap();
 
@@ -162,8 +166,9 @@ fn velocity_can_move_kinematic_bodies() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
-    let body = bodies
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    let body = world
+        .bodies
         .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
         .unwrap();
 

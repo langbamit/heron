@@ -10,7 +10,7 @@ use bevy::reflect::TypeRegistryArc;
 use heron_core::{Body, PhysicMaterial};
 use heron_rapier::rapier::dynamics::IntegrationParameters;
 use heron_rapier::rapier::geometry::ColliderSet;
-use heron_rapier::{BodyHandle, RapierPlugin};
+use heron_rapier::{BodyHandle, PhysicsWorld, RapierPlugin};
 
 fn test_app() -> App {
     let mut builder = App::build();
@@ -40,8 +40,9 @@ fn restitution_can_be_defined_when_creating_body() {
 
     app.update();
 
-    let colliders = app.resources.get::<ColliderSet>().unwrap();
-    let collider = colliders
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    let collider = world
+        .colliders
         .get(app.world.get::<BodyHandle>(entity).unwrap().collider())
         .unwrap();
 
@@ -71,8 +72,9 @@ fn restitution_can_be_updated() {
 
     app.update();
 
-    let colliders = app.resources.get::<ColliderSet>().unwrap();
-    let collider = colliders
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    let collider = world
+        .colliders
         .get(app.world.get::<BodyHandle>(entity).unwrap().collider())
         .unwrap();
 

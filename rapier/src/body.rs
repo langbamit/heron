@@ -11,15 +11,14 @@ use crate::rapier::dynamics::{
 };
 use crate::rapier::geometry::{Collider, ColliderBuilder, ColliderSet};
 use crate::rapier::math::Point;
-use crate::BodyHandle;
+use crate::{BodyHandle, PhysicsWorld};
 
 pub(crate) type HandleMap = FnvHashMap<Entity, RigidBodyHandle>;
 
 #[allow(clippy::type_complexity)]
 pub(crate) fn create(
     commands: &mut Commands,
-    mut bodies: ResMut<'_, RigidBodySet>,
-    mut colliders: ResMut<'_, ColliderSet>,
+    mut world: ResMut<'_, PhysicsWorld>,
     mut handles: ResMut<'_, HandleMap>,
     query: Query<
         '_,
@@ -35,6 +34,7 @@ pub(crate) fn create(
         Without<BodyHandle>,
     >,
 ) {
+    let world: &mut PhysicsWorld = &mut world;
     for (entity, body, transform, body_type, velocity, material, rotation_constraints) in
         query.iter()
     {
@@ -74,8 +74,8 @@ pub(crate) fn create(
             builder = builder.angvel(v.angular.into_rapier());
         }
 
-        let rigid_body = bodies.insert(builder.build());
-        let collider = colliders.insert(
+        let rigid_body = world.bodies.insert(builder.build());
+        let collider = world.colliders.insert(
             build_collider(
                 entity,
                 &body,
@@ -83,7 +83,7 @@ pub(crate) fn create(
                 material.cloned().unwrap_or_default(),
             ),
             rigid_body,
-            &mut bodies,
+            &mut world.bodies,
         );
         handles.insert(entity, rigid_body);
         commands.insert_one(
@@ -99,9 +99,7 @@ pub(crate) fn create(
 #[allow(clippy::type_complexity)]
 pub(crate) fn remove_bodies(
     commands: &mut Commands,
-    mut bodies: ResMut<'_, RigidBodySet>,
-    mut colliders: ResMut<'_, ColliderSet>,
-    mut joints: ResMut<'_, JointSet>,
+    mut world: ResMut<'_, PhysicsWorld>,
     changed: Query<
         '_,
         (Entity, &BodyHandle),
@@ -114,24 +112,30 @@ pub(crate) fn remove_bodies(
     >,
     removed: Query<'_, (Entity, &BodyHandle), Without<RotationConstraints>>,
 ) {
+    let world: &mut PhysicsWorld = &mut world;
     for (entity, handle) in changed.iter() {
-        bodies.remove(handle.rigid_body, &mut colliders, &mut joints);
+        world
+            .bodies
+            .remove(handle.rigid_body, &mut world.colliders, &mut world.joints);
         commands.remove_one::<BodyHandle>(entity);
     }
 
     for entity in removed.removed::<RotationConstraints>() {
         if let Ok((entity, handle)) = removed.get(*entity) {
-            bodies.remove(handle.rigid_body, &mut colliders, &mut joints);
+            world
+                .bodies
+                .remove(handle.rigid_body, &mut world.colliders, &mut world.joints);
             commands.remove_one::<BodyHandle>(entity);
         }
     }
 }
 
 pub(crate) fn update_rapier_status(
-    mut bodies: ResMut<'_, RigidBodySet>,
+    mut world: ResMut<'_, PhysicsWorld>,
     with_type_changed: Query<'_, (&BodyType, &BodyHandle), Changed<BodyType>>,
     without_type: Query<'_, &BodyHandle, Without<BodyType>>,
 ) {
+    let bodies = &mut world.bodies;
     for (body_type, handle) in with_type_changed.iter() {
         if let Some(body) = bodies.get_mut(handle.rigid_body) {
             body.body_status = body_status(*body_type);
@@ -150,9 +154,10 @@ pub(crate) fn update_rapier_status(
 }
 
 pub(crate) fn update_rapier_position(
-    mut bodies: ResMut<'_, RigidBodySet>,
+    mut world: ResMut<'_, PhysicsWorld>,
     query: Query<'_, (&GlobalTransform, &BodyHandle), Mutated<GlobalTransform>>,
 ) {
+    let bodies = &mut world.bodies;
     for (transform, handle) in query.iter() {
         if let Some(body) = bodies.get_mut(handle.rigid_body) {
             let isometry = (transform.translation, transform.rotation).into_rapier();
@@ -166,7 +171,7 @@ pub(crate) fn update_rapier_position(
 }
 
 pub(crate) fn update_bevy_transform(
-    bodies: Res<'_, RigidBodySet>,
+    world: Res<'_, PhysicsWorld>,
     mut query: Query<
         '_,
         (
@@ -182,7 +187,7 @@ pub(crate) fn update_bevy_transform(
             continue;
         }
 
-        let body = match bodies.get(handle.rigid_body) {
+        let body = match world.bodies.get(handle.rigid_body) {
             None => continue,
             Some(body) => body,
         };
@@ -215,14 +220,15 @@ pub(crate) fn update_bevy_transform(
 pub(crate) fn remove(
     commands: &mut Commands,
     mut handles: ResMut<'_, HandleMap>,
-    mut bodies: ResMut<'_, RigidBodySet>,
-    mut colliders: ResMut<'_, ColliderSet>,
-    mut joints: ResMut<'_, JointSet>,
+    mut world: ResMut<'_, PhysicsWorld>,
     query: Query<'_, (Entity, &BodyHandle), Without<Body>>,
 ) {
+    let world: &mut PhysicsWorld = &mut world;
     for entity in query.removed::<Body>() {
         if let Some(handle) = handles.remove(entity) {
-            bodies.remove(handle, &mut colliders, &mut joints);
+            world
+                .bodies
+                .remove(handle, &mut world.colliders, &mut world.joints);
             commands.remove_one::<BodyHandle>(*entity);
         }
     }

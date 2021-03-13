@@ -11,7 +11,7 @@ use heron_core::utils::NearZero;
 use heron_core::{Body, PhysicMaterial};
 use heron_rapier::convert::IntoBevy;
 use heron_rapier::rapier::dynamics::{IntegrationParameters, MassProperties, RigidBodySet};
-use heron_rapier::{BodyHandle, RapierPlugin};
+use heron_rapier::{BodyHandle, PhysicsWorld, RapierPlugin};
 
 fn test_app() -> App {
     let mut builder = App::build();
@@ -35,8 +35,9 @@ fn bodies_are_created_with_a_default_density() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
-    let body = bodies
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    let body = world
+        .bodies
         .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
         .unwrap();
     assert!(body.mass() > 0.0);
@@ -60,8 +61,9 @@ fn bodies_are_created_with_defined_density() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
-    let body = bodies
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    let body = world
+        .bodies
         .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
         .unwrap();
 
@@ -90,8 +92,9 @@ fn density_can_be_updated_after_creation() {
 
     app.update();
 
-    let bodies = app.resources.get::<RigidBodySet>().unwrap();
-    let body = bodies
+    let world = app.resources.get::<PhysicsWorld>().unwrap();
+    let body = world
+        .bodies
         .get(app.world.get::<BodyHandle>(entity).unwrap().rigid_body())
         .unwrap();
 
