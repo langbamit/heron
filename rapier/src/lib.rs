@@ -19,16 +19,17 @@ use bevy::ecs::{IntoSystem, Schedule, SystemStage};
 use heron_core::CollisionEvent;
 
 use crate::body::HandleMap;
-pub use crate::pipeline::PhysicsWorld;
-use crate::rapier::dynamics::{IntegrationParameters, JointSet, RigidBodyHandle, RigidBodySet};
-use crate::rapier::geometry::{BroadPhase, ColliderHandle, ColliderSet, NarrowPhase};
+use crate::rapier::dynamics::{IntegrationParameters, RigidBodyHandle};
+use crate::rapier::geometry::{BroadPhase, ColliderHandle, NarrowPhase};
 pub use crate::rapier::na as nalgebra;
 use crate::rapier::pipeline::PhysicsPipeline;
+pub use crate::world::PhysicsWorld;
 
 mod body;
 pub mod convert;
 mod pipeline;
 mod velocity;
+mod world;
 
 #[allow(unused)]
 mod stage {

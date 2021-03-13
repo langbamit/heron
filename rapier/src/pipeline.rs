@@ -10,25 +10,8 @@ use crate::rapier::dynamics::{IntegrationParameters, JointSet, RigidBodySet};
 use crate::rapier::geometry::{
     BroadPhase, ColliderHandle, ColliderSet, ContactEvent, IntersectionEvent, NarrowPhase,
 };
-use crate::rapier::pipeline::{ChannelEventCollector, PhysicsPipeline, QueryPipeline};
-
-pub struct PhysicsWorld {
-    pub bodies: RigidBodySet,
-    pub colliders: ColliderSet,
-    pub joints: JointSet,
-    pub query: QueryPipeline,
-}
-
-impl Default for PhysicsWorld {
-    fn default() -> Self {
-        Self {
-            bodies: RigidBodySet::new(),
-            colliders: ColliderSet::new(),
-            joints: JointSet::new(),
-            query: QueryPipeline::default(),
-        }
-    }
-}
+use crate::rapier::pipeline::{ChannelEventCollector, PhysicsPipeline};
+use crate::PhysicsWorld;
 
 pub(crate) fn step(
     gravity: Res<'_, Gravity>,
