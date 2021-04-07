@@ -24,7 +24,7 @@ fn main() {
     .run();
 }
 
-fn spawn(commands: &mut Commands) {
+fn spawn(mut commands: Commands) {
     commands
 
         // Spawn any bundle of your choice. Only make sure there is a `GlobalTransform`
